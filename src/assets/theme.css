@@ -1,0 +1,256 @@
+/* Midnight Obsidian — from stitch_midnight_obsidian_job_board */
+
+:root {
+  --bg-ink: #0a0a0b;
+  --surface-dark: #121214;
+  --surface-charcoal: #1a1a1c;
+  --surface-low: #1a1c1a;
+  --surface-container: #241e1a;
+  --surface-variant: #3a332f;
+  --surface-high: #292a28;
+  --border-subtle: #2e2e32;
+
+  --primary: #ffdcc3;
+  --primary-dim: #ffb77d;
+  --on-primary: #4d2600;
+  --primary-container: #ffb77d;
+
+  --secondary: #c9beff;
+  --secondary-container: #483f77;
+  --tertiary: #c7e7ff;
+  --tertiary-container: #85cfff;
+
+  --on-surface: #ece0d9;
+  --on-surface-variant: #d7c3b6;
+  --on-background: #ece0d9;
+  --bone-white: #e5e5e1;
+
+  --error: #ffb4ab;
+  --error-container: #93000a;
+  --success: #86efac;
+  --warning: #fcd34d;
+
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --sidebar-width: 256px;
+  --header-height: 64px;
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  --radius-full: 9999px;
+  --gutter: 24px;
+  --margin-desktop: 48px;
+}
+
+/* Typography */
+.font-display {
+  font-family: var(--font-display), serif;
+}
+.font-mono {
+  font-family: var(--font-mono), serif;
+}
+.page-title {
+  font-family: var(--font-display), serif;
+  font-size: clamp(1.75rem, 4vw, 3rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--on-surface);
+  margin: 0 0 0.5rem;
+}
+.page-subtitle {
+  font-size: 1rem;
+  color: var(--on-surface-variant);
+  margin: 0;
+  opacity: 0.85;
+}
+.label-caps {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+}
+
+/* Glass & surfaces */
+.glass-panel {
+  background: rgba(26, 26, 28, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 220, 195, 0.15);
+  border-radius: var(--radius-lg);
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.glass-panel:hover {
+  border-color: rgba(255, 183, 125, 0.3);
+  box-shadow: 0 0 20px rgba(255, 183, 125, 0.08);
+}
+.glass-panel--glow {
+  border-color: rgba(255, 183, 125, 0.3);
+  box-shadow: 0 0 30px rgba(255, 220, 195, 0.15);
+}
+
+/* Stat card */
+.stat-card {
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 183, 125, 0.1);
+  color: var(--primary-dim);
+  margin-bottom: 1rem;
+}
+.stat-card__value {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--on-surface);
+  margin: 0.25rem 0;
+}
+.stat-card__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+}
+
+/* Chips / badges */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: capitalize;
+}
+.chip--role-admin {
+  background: rgba(201, 190, 255, 0.15);
+  color: var(--secondary);
+  border: 1px solid rgba(201, 190, 255, 0.25);
+}
+.chip--role-employer {
+  background: rgba(255, 183, 125, 0.12);
+  color: var(--primary-dim);
+  border: 1px solid rgba(255, 183, 125, 0.2);
+}
+.chip--role-candidate {
+  background: rgba(133, 207, 255, 0.12);
+  color: var(--tertiary-container);
+  border: 1px solid rgba(133, 207, 255, 0.2);
+}
+.chip--active {
+  background: rgba(134, 239, 172, 0.12);
+  color: var(--success);
+}
+.chip--banned {
+  background: rgba(255, 180, 171, 0.12);
+  color: var(--error);
+  border: 1px solid rgba(255, 180, 171, 0.25);
+}
+.chip--paid {
+  background: rgba(134, 239, 172, 0.12);
+  color: var(--success);
+}
+.chip--pending {
+  background: rgba(252, 211, 77, 0.12);
+  color: var(--warning);
+}
+.chip--failed {
+  background: rgba(255, 180, 171, 0.12);
+  color: var(--error);
+}
+
+/* Data table */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.data-table th {
+  text-align: left;
+  padding: 0.85rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+  background: rgba(18, 18, 20, 0.5);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.data-table td {
+  padding: 0.85rem 1rem;
+  color: var(--on-surface);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.data-table tbody tr {
+  transition: background 0.15s;
+}
+.data-table tbody tr:hover {
+  background: rgba(58, 51, 47, 0.25);
+}
+
+/* Form inputs */
+.input-field {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  color: var(--on-surface);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.input-field::placeholder {
+  color: var(--on-surface-variant);
+  opacity: 0.6;
+}
+.input-field:focus {
+  outline: none;
+  border-color: var(--primary-dim);
+  box-shadow: 0 0 0 3px rgba(255, 183, 125, 0.15);
+}
+.select-field {
+  padding: 0.5rem 0.75rem;
+  background: var(--surface-low);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--on-surface);
+  font-size: 0.9rem;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface-dark);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--surface-variant);
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+}
+.material-symbols-outlined.filled {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
