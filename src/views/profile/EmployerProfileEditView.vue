@@ -272,8 +272,9 @@ async function save() {
       website: form.website,
       description: form.description,
     };
-    const response = await profileApi.updateProfile(payload);
-    serverMessage.value = response.message ?? "Employer profile saved.";
+    const updatedProfile = await profileApi.updateProfile(payload);
+    hydrateProfile(updatedProfile);
+    serverMessage.value = "Employer profile saved.";
   } catch (error: any) {
     const responseErrors = error?.response?.data?.errors ?? error?.errors;
     if (error?.response?.status === 422 && responseErrors) {

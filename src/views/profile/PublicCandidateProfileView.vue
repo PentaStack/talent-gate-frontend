@@ -26,117 +26,131 @@
     </header>
 
     <main class="public-candidate-shell">
-      <section class="public-candidate-hero glass-card premium-glow">
-        <div class="public-candidate-avatar-wrap">
-          <div class="public-candidate-avatar">
-            <img
-              v-if="profile?.avatar_url"
-              :src="profile.avatar_url"
-              :alt="profile?.name ?? 'Candidate avatar'"
-            />
-            <div v-else class="public-candidate-avatar__fallback">
-              {{ initials }}
+      <div v-if="loading" class="loading-state glass-card">
+        <span class="material-symbols-outlined spin-icon"
+          >progress_activity</span
+        >
+        <p>Loading profile...</p>
+      </div>
+
+      <div v-else-if="error" class="error-state glass-card">
+        <span class="material-symbols-outlined">error</span>
+        <p>{{ error }}</p>
+      </div>
+
+      <template v-else-if="profile">
+        <section class="public-candidate-hero glass-card premium-glow">
+          <div class="public-candidate-avatar-wrap">
+            <div class="public-candidate-avatar">
+              <img
+                v-if="profile?.avatar_url"
+                :src="profile.avatar_url"
+                :alt="profile?.name ?? 'Candidate avatar'"
+              />
+              <div v-else class="public-candidate-avatar__fallback">
+                {{ initials }}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="public-candidate-meta">
-          <div class="public-candidate-badges">
-            <span
-              class="public-candidate-badge public-candidate-badge--primary"
-            >
-              {{ experienceLabel }}
-            </span>
-            <span
-              class="public-candidate-badge public-candidate-badge--secondary"
-              >Open to opportunities</span
-            >
+          <div class="public-candidate-meta">
+            <div class="public-candidate-badges">
+              <span
+                class="public-candidate-badge public-candidate-badge--primary"
+              >
+                {{ experienceLabel }}
+              </span>
+              <span
+                class="public-candidate-badge public-candidate-badge--secondary"
+                >Open to opportunities</span
+              >
+            </div>
+
+            <h1>{{ profile?.name ?? "Candidate Profile" }}</h1>
+            <p class="public-candidate-handle">Public candidate profile</p>
           </div>
+        </section>
 
-          <h1>{{ profile?.name ?? "Candidate Profile" }}</h1>
-          <p class="public-candidate-handle">Public candidate profile</p>
-        </div>
-      </section>
-
-      <section class="public-candidate-grid">
-        <article class="public-candidate-card glass-card">
-          <div class="section-heading">
-            <p>About</p>
-            <h2>Bio</h2>
-          </div>
-          <p class="public-candidate-bio">
-            {{ profile?.bio || "This candidate has not added a bio yet." }}
-          </p>
-        </article>
-
-        <article class="public-candidate-card glass-card">
-          <div class="section-heading">
-            <p>Skills</p>
-            <h2>Skill Chips</h2>
-          </div>
-          <div class="skill-chip-list">
-            <span
-              v-for="skill in profile?.skills ?? []"
-              :key="skill"
-              class="skill-chip"
-            >
-              {{ skill }}
-            </span>
-            <p v-if="!profile?.skills?.length" class="public-candidate-empty">
-              No skills listed yet.
+        <section class="public-candidate-grid">
+          <article class="public-candidate-card glass-card">
+            <div class="section-heading">
+              <p>About</p>
+              <h2>Bio</h2>
+            </div>
+            <p class="public-candidate-bio">
+              {{ profile?.bio || "This candidate has not added a bio yet." }}
             </p>
+          </article>
+
+          <article class="public-candidate-card glass-card">
+            <div class="section-heading">
+              <p>Skills</p>
+              <h2>Skill Chips</h2>
+            </div>
+            <div class="skill-chip-list">
+              <span
+                v-for="skill in profile?.skills ?? []"
+                :key="skill"
+                class="skill-chip"
+              >
+                {{ skill }}
+              </span>
+              <p v-if="!profile?.skills?.length" class="public-candidate-empty">
+                No skills listed yet.
+              </p>
+            </div>
+          </article>
+        </section>
+
+        <aside class="public-candidate-aside glass-card premium-glow">
+          <div class="public-candidate-aside__heading">
+            <p>Resume Access</p>
+            <h2>View Resume</h2>
           </div>
-        </article>
-      </section>
 
-      <aside class="public-candidate-aside glass-card premium-glow">
-        <div class="public-candidate-aside__heading">
-          <p>Resume Access</p>
-          <h2>View Resume</h2>
-        </div>
+          <p class="public-candidate-aside__text">
+            {{
+              auth.user?.role === "employer"
+                ? "Authenticated employers can open a 60-minute signed resume link."
+                : "Resume access is available to authenticated employers only."
+            }}
+          </p>
 
-        <p class="public-candidate-aside__text">
-          {{
-            auth.user?.role === "employer"
-              ? "Authenticated employers can open a 60-minute signed resume link."
-              : "Resume access is available to authenticated employers only."
-          }}
-        </p>
+          <button
+            v-if="auth.user?.role === 'employer'"
+            type="button"
+            class="resume-button button-hover-effect"
+            :disabled="resumeLoading"
+            @click="openResume"
+          >
+            <span class="material-symbols-outlined">description</span>
+            <span>{{ resumeLoading ? "Preparing..." : "View Resume" }}</span>
+          </button>
 
-        <button
-          v-if="auth.user?.role === 'employer'"
-          type="button"
-          class="resume-button button-hover-effect"
-          :disabled="resumeLoading"
-          @click="openResume"
-        >
-          <span class="material-symbols-outlined">description</span>
-          <span>{{ resumeLoading ? "Preparing..." : "View Resume" }}</span>
-        </button>
-
-        <div v-else class="resume-guest-note">
-          Sign in as an employer to access a temporary signed resume URL.
-        </div>
-
-        <p
-          v-if="resumeMessage"
-          class="resume-status"
-          :class="resumeMessageKindClass"
-        >
-          {{ resumeMessage }}
-        </p>
-
-        <div class="candidate-details">
-          <div>
-            <span>Experience Level</span>
-            <strong>{{ experienceLabel }}</strong>
+          <div v-else class="resume-guest-note">
+            Sign in as an employer to access a temporary signed resume URL.
           </div>
-          <div>
-            <span>Profile Type</span>
-            <strong>Read only</strong>
+
+          <p
+            v-if="resumeMessage"
+            class="resume-status"
+            :class="resumeMessageKindClass"
+          >
+            {{ resumeMessage }}
+          </p>
+
+          <div class="candidate-details">
+            <div>
+              <span>Experience Level</span>
+              <strong>{{ experienceLabel }}</strong>
+            </div>
+            <div>
+              <span>Profile Type</span>
+              <strong>Read only</strong>
+            </div>
           </div>
-        </div>
-      </aside>
+        </aside>
+      </template>
     </main>
   </div>
 </template>
@@ -150,6 +164,8 @@ import * as profileApi from "@/api/profile";
 const route = useRoute();
 const auth = useAuthStore();
 const profile = ref<any>(null);
+const loading = ref(false);
+const error = ref<string | null>(null);
 const resumeLoading = ref(false);
 const resumeMessage = ref<string | null>(null);
 const resumeMessageKind = ref<"success" | "error" | null>(null);
@@ -180,9 +196,22 @@ const resumeMessageKindClass = computed(() => {
 });
 
 async function loadProfile() {
+  loading.value = true;
+  error.value = null;
   resumeMessage.value = null;
   resumeMessageKind.value = null;
-  profile.value = await profileApi.getPublicCandidate(userId.value);
+
+  try {
+    profile.value = await profileApi.getPublicCandidate(userId.value);
+  } catch (err: any) {
+    profile.value = null;
+    error.value =
+      err?.response?.data?.message ??
+      err?.message ??
+      "Unable to load profile data.";
+  } finally {
+    loading.value = false;
+  }
 }
 
 async function openResume() {
@@ -366,6 +395,38 @@ watch(userId, loadProfile, { immediate: true });
   grid-template-columns: minmax(0, 1fr) minmax(320px, 0.85fr);
   gap: 1.5rem;
   align-items: start;
+}
+
+.loading-state,
+.error-state {
+  grid-column: 1 / -1;
+  padding: 2rem 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.loading-state {
+  color: var(--on-surface);
+}
+
+.error-state {
+  color: #ffd6d2;
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.spin-icon {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .public-candidate-hero {

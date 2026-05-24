@@ -35,8 +35,7 @@ const secondaryCta = computed(() => {
       <div class="nav-actions">
         <RouterLink v-if="!auth.isAuthenticated" to="/login" class="nav-ghost">Sign In</RouterLink>
         <RouterLink v-else to="/profile/edit" class="nav-ghost">Profile</RouterLink>
-        <RouterLink to="/register" class="nav-primary">Post a Job</RouterLink>
-      </div>
+        <RouterLink v-if="!auth.isAuthenticated || auth.isEmployer" :to="auth.isEmployer ? '/payments/checkout' : '/register'" class="nav-primary">Post a Job</RouterLink>      </div>
     </nav>
 
     <main class="page-wrap">

@@ -41,6 +41,7 @@ import { uploadAvatar } from "@/api/profile";
 const props = defineProps({
   currentUrl: { type: String as PropType<string | null>, default: null },
   label: { type: String, default: "Change" },
+  userInitials: { type: String, default: "U" },
 });
 
 const emits = defineEmits<{ (e: "uploaded", url: string): void }>();
@@ -58,8 +59,7 @@ watch(
 );
 
 const initials = computed(() => {
-  if (!props.currentUrl) return "U";
-  return "";
+  return props.currentUrl ? "" : props.userInitials;
 });
 
 function pick() {

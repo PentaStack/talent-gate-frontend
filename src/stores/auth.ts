@@ -47,6 +47,15 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function init() {
+    const storedUser = localStorage.getItem("tg_user");
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch {
+        localStorage.removeItem("tg_user");
+      }
+    }
+
     await fetchUser();
     initialized.value = true;
   }

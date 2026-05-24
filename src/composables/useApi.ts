@@ -16,7 +16,7 @@ export function useApi() {
       }
 
       if (status === 422) {
-        const errors = err.response.data.errors || {};
+        const errors = err.response?.data?.errors || {};
         throw { status: 422, errors };
       }
 

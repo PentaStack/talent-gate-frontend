@@ -8,7 +8,8 @@
         <p class="profile-kicker">Professional Identity</p>
         <h1>Edit your profile.</h1>
         <p class="profile-summary">
-          Keep your bio, experience level, skills, and resume aligned so engineering teams see your technical capabilities instantly.
+          Keep your bio, experience level, skills, and resume aligned so
+          engineering teams see your technical capabilities instantly.
         </p>
 
         <div class="profile-feature glass-panel">
@@ -18,7 +19,8 @@
           <div>
             <p class="profile-feature__title">Focus first</p>
             <p class="profile-feature__text">
-              A complete technical profile helps top engineering teams precision-match you with high-signal roles.
+              A complete technical profile helps top engineering teams
+              precision-match you with high-signal roles.
             </p>
           </div>
         </div>
@@ -81,7 +83,9 @@
           <label class="profile-field profile-field--full">
             <span>Full Name</span>
             <div class="profile-input-wrap">
-              <span class="material-symbols-outlined profile-input-icon">person</span>
+              <span class="material-symbols-outlined profile-input-icon"
+                >person</span
+              >
               <input
                 v-model.trim="form.name"
                 type="text"
@@ -115,7 +119,9 @@
           <label class="profile-field profile-field--full">
             <span>Experience Level</span>
             <div class="profile-input-wrap">
-              <span class="material-symbols-outlined profile-input-icon">work_history</span>
+              <span class="material-symbols-outlined profile-input-icon"
+                >work_history</span
+              >
               <select v-model="form.experience_level">
                 <option value="">Select experience level</option>
                 <option value="junior">Junior</option>
@@ -131,7 +137,9 @@
           <!-- Skills Tag Input -->
           <div class="profile-field profile-field--full">
             <span>Skills</span>
-            <p class="skills-instruction">Press Enter or Comma to add a skill tag.</p>
+            <p class="skills-instruction">
+              Press Enter or Comma to add a skill tag.
+            </p>
             <div class="skills-input-shell">
               <span
                 v-for="(skill, index) in form.skills"
@@ -165,8 +173,10 @@
           <!-- Resume PDF Upload -->
           <div class="profile-field profile-field--full">
             <span>Resume</span>
-            <p class="skills-instruction">Drag and drop a PDF or DOCX file, or browse manually.</p>
-            
+            <p class="skills-instruction">
+              Drag and drop a PDF or DOCX file, or browse manually.
+            </p>
+
             <div
               class="resume-dropzone"
               :class="{ 'resume-dropzone--active': isDropzoneActive }"
@@ -338,7 +348,8 @@ async function onAvatarSelected(event: Event) {
 
   try {
     const data = await profileApi.uploadAvatar(file);
-    avatarPreview.value = data.avatar_url ?? data.logo_url ?? avatarPreview.value;
+    avatarPreview.value =
+      data.avatar_url ?? data.logo_url ?? avatarPreview.value;
     serverMessage.value = "Avatar uploaded successfully.";
     if (avatarInput.value) avatarInput.value.value = "";
   } catch (error: any) {
@@ -430,8 +441,9 @@ async function save() {
       skills: form.skills,
       experience_level: form.experience_level,
     };
-    const response = await profileApi.updateProfile(payload);
-    serverMessage.value = response.message ?? "Profile saved successfully.";
+    const updatedProfile = await profileApi.updateProfile(payload);
+    hydrateProfile(updatedProfile);
+    serverMessage.value = "Profile saved successfully.";
   } catch (error: any) {
     const responseErrors = error?.response?.data?.errors ?? error?.errors;
     if (error?.response?.status === 422 && responseErrors) {
