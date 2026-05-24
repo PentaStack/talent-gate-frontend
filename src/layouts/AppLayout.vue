@@ -25,7 +25,14 @@ const navLinks = computed<NavItem[]>(() => {
   if (auth.user.role === 'employer') {
     return [
       { to: '/employer/analytics', label: 'Analytics', icon: 'analytics' },
+      { to: '/profile/edit', label: 'Company Profile', icon: 'corporate_fare' },
       { to: '/payments/history', label: 'Payments', icon: 'payments' },
+    ]
+  }
+  if (auth.user.role === 'candidate') {
+    return [
+      { to: '/jobs', label: 'Find Jobs', icon: 'work_history' },
+      { to: '/profile/edit', label: 'My Profile', icon: 'person' },
     ]
   }
   return []
@@ -70,13 +77,17 @@ async function logout() {
       </div>
 
       <div class="sidebar__footer">
-        <div v-if="auth.user" class="sidebar__user">
+        <router-link
+          v-if="auth.user"
+          :to="`/profile/${auth.user.id}`"
+          class="sidebar__user"
+        >
           <div class="sidebar__avatar">{{ auth.user.name.charAt(0) }}</div>
           <div>
             <p class="sidebar__user-name">{{ auth.user.name }}</p>
             <p class="sidebar__user-role">{{ auth.user.role }}</p>
           </div>
-        </div>
+        </router-link>
         <button type="button" class="sidebar__logout" @click="logout">
           <span class="material-symbols-outlined">logout</span>
           Logout
@@ -186,7 +197,15 @@ async function logout() {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0 0.5rem 1rem;
+  padding: 0.6rem 0.5rem;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  margin-bottom: 0.5rem;
+}
+.sidebar__user:hover {
+  background: rgba(255, 183, 125, 0.08);
 }
 .sidebar__avatar {
   width: 2.5rem;
