@@ -192,7 +192,7 @@
               </div>
               <div>
                 <span>Organization</span>
-                <strong>Employer Co</strong>
+                <strong>{{ profile.company_name || profile.name || 'Not specified' }}</strong>
               </div>
             </div>
           </aside>
