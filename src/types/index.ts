@@ -84,3 +84,43 @@ export interface AppNotification {
   type: 'application' | 'payment' | 'job' | 'system'
   created_at: string
 }
+
+export type ApplicationStatus =
+  | 'pending'
+  | 'shortlisted'
+  | 'accepted'
+  | 'rejected'
+  | 'withdrawn'
+
+export interface CandidateApplication {
+  id: number
+  status: ApplicationStatus
+  cover_letter: string | null
+  submitted_at: string
+  viewed_at: string | null
+  job: {
+    id: number
+    title: string
+    employer: { company_name: string; logo_url: string | null }
+  }
+}
+
+export interface EmployerApplicationListItem {
+  id: number
+  status: ApplicationStatus
+  submitted_at: string
+  viewed_at: string | null
+  cover_letter: string
+  candidate: {
+    id: number
+    name: string
+    experience_level: string | null
+    skills: string[]
+    avatar_url: string | null
+  }
+}
+
+export interface PaginatedResponse<T> {
+  data: T[]
+  meta: { current_page: number; last_page: number; per_page: number; total: number }
+}
