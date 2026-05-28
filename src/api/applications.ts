@@ -45,13 +45,11 @@ export async function updateApplicationStatus(
   return data.data
 }
 
-export async function openApplicationResume(applicationId: number): Promise<void> {
+export async function fetchApplicationResume(applicationId: number): Promise<Blob> {
   const response = await api.get(`/v1/employer/applications/${applicationId}/resume`, {
     responseType: 'blob',
   })
-  const blob = new Blob([response.data], { type: 'application/pdf' })
-  const url = URL.createObjectURL(blob)
-  window.open(url, '_blank', 'noopener')
+  return response.data as Blob
 }
 
 export async function updateApplicationNotes(

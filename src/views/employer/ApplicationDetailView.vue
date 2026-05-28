@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import AppLayout from "@/layouts/AppLayout.vue";
 import ApplicationStatusBadge from "@/components/applications/ApplicationStatusBadge.vue";
@@ -8,7 +8,7 @@ import {
     getApplication,
     updateApplicationStatus,
     updateApplicationNotes,
-    openApplicationResume,
+    fetchApplicationResume,
 } from "@/api/applications";
 import { useToast } from "@/composables/useToast";
 import type { ApplicationStatus, EmployerApplicationListItem } from "@/types";
@@ -25,27 +25,42 @@ const isLoading = ref(true);
 const actionsRef = ref<InstanceType<typeof EmployerStatusActions> | null>(null);
 const notesValue = ref<string>("");
 const isSavingNotes = ref(false);
-const isOpeningResume = ref(false);
 
-async function viewResume() {
-  if (isOpeningResume.value) return
-  isOpeningResume.value = true
-  try {
-    await openApplicationResume(applicationId)
-  } catch {
-    showToast('Failed to open resume.', 'error')
-  } finally {
-    isOpeningResume.value = false
-  }
+type ResumeState = "loading" | "pdf" | "unsupported" | "error";
+const resumeState = ref<ResumeState>("loading");
+const resumeUrl = ref<string | null>(null);
+
+async function loadResume() {
+    resumeState.value = "loading";
+    try {
+        const blob = await fetchApplicationResume(applicationId);
+        if (resumeUrl.value) URL.revokeObjectURL(resumeUrl.value);
+        resumeUrl.value = URL.createObjectURL(blob);
+        resumeState.value =
+            blob.type === "application/pdf" ? "pdf" : "unsupported";
+    } catch {
+        resumeState.value = "error";
+    }
+}
+
+function openResumeInTab() {
+    if (resumeUrl.value) window.open(resumeUrl.value, "_blank", "noopener");
 }
 
 onMounted(async () => {
     try {
         application.value = await getApplication(applicationId);
         notesValue.value = application.value.notes ?? "";
+        if (application.value.candidate.has_resume) {
+            loadResume();
+        }
     } finally {
         isLoading.value = false;
     }
+});
+
+onBeforeUnmount(() => {
+    if (resumeUrl.value) URL.revokeObjectURL(resumeUrl.value);
 });
 
 async function handleStatusUpdate(newStatus: ApplicationStatus) {
@@ -183,13 +198,61 @@ function formatDate(iso: string) {
                                 application.cover_letter
                             }}</pre>
                         </div>
+
+                        <div
+                            v-if="application.candidate.has_resume"
+                            class="resume-panel glass-panel"
+                        >
+                            <div class="resume-panel__head">
+                                <p class="panel-label">Resume</p>
+                                <button
+                                    v-if="resumeState === 'pdf'"
+                                    type="button"
+                                    class="resume-open-btn"
+                                    @click="openResumeInTab"
+                                >
+                                    <span class="material-symbols-outlined">open_in_new</span>
+                                    Open in new tab
+                                </button>
+                            </div>
+
+                            <div v-if="resumeState === 'loading'" class="resume-status">
+                                <span class="spinner" />
+                                <span>Loading resume…</span>
+                            </div>
+
+                            <iframe
+                                v-else-if="resumeState === 'pdf'"
+                                :src="resumeUrl!"
+                                class="resume-frame"
+                                title="Candidate resume"
+                            />
+
+                            <div v-else-if="resumeState === 'unsupported'" class="resume-status">
+                                <span class="material-symbols-outlined">description</span>
+                                <span>This resume can’t be previewed here.</span>
+                                <button type="button" class="resume-open-btn" @click="openResumeInTab">
+                                    <span class="material-symbols-outlined">open_in_new</span>
+                                    Open in new tab
+                                </button>
+                            </div>
+
+                            <div v-else class="resume-status">
+                                <span class="material-symbols-outlined">error</span>
+                                <span>Couldn’t load the resume.</span>
+                                <button type="button" class="resume-open-btn" @click="loadResume">
+                                    <span class="material-symbols-outlined">refresh</span>
+                                    Retry
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Sidebar -->
                     <aside class="adv-sidebar">
-                        <!-- Contact & Resume -->
+                        <!-- Contact -->
                         <div class="sidebar-panel glass-panel">
-                            <p class="panel-label">Contact & Resume</p>
+                            <p class="panel-label">Contact</p>
                             <a
                                 :href="`mailto:${application.candidate.email}`"
                                 class="contact-link"
@@ -199,17 +262,9 @@ function formatDate(iso: string) {
                                 >
                                 {{ application.candidate.email }}
                             </a>
-                            <button
-                                v-if="application.candidate.has_resume"
-                                type="button"
-                                class="resume-btn"
-                                :disabled="isOpeningResume"
-                                @click="viewResume"
-                            >
-                                <span class="material-symbols-outlined">description</span>
-                                {{ isOpeningResume ? 'Opening…' : 'View Resume' }}
-                            </button>
-                            <p v-else class="no-resume">No resume uploaded.</p>
+                            <p v-if="!application.candidate.has_resume" class="no-resume">
+                                No resume uploaded.
+                            </p>
                         </div>
 
                         <!-- Technical Skills -->
@@ -403,7 +458,8 @@ function formatDate(iso: string) {
 }
 
 .bio-panel,
-.cover-panel {
+.cover-panel,
+.resume-panel {
     padding: 1.5rem;
     border-radius: 1.1rem;
 }
@@ -466,31 +522,80 @@ function formatDate(iso: string) {
     flex-shrink: 0;
 }
 
-.resume-btn {
+.resume-panel__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.resume-frame {
+    width: 100%;
+    height: 85vh;
+    min-height: 700px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.65rem;
+    background: #fff;
+}
+
+.resume-status {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    min-height: 220px;
+    color: var(--on-surface-variant);
+    font-size: 0.88rem;
+    text-align: center;
+}
+
+.resume-status .material-symbols-outlined {
+    font-size: 2rem;
+}
+
+.spinner {
+    display: inline-block;
+    width: 1.4rem;
+    height: 1.4rem;
+    border: 2px solid rgba(255, 183, 125, 0.3);
+    border-top-color: var(--primary-dim);
+    border-radius: 50%;
+    animation: spin 0.65s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.resume-open-btn {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    padding: 0.45rem 1rem;
+    padding: 0.4rem 0.9rem;
+    margin-bottom: 0.75rem;
     border-radius: 9999px;
     background: rgba(255, 183, 125, 0.08);
     border: 1px solid rgba(255, 183, 125, 0.25);
     color: var(--primary-dim);
     font: inherit;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     font-weight: 600;
-    text-decoration: none;
+    cursor: pointer;
     transition:
         background 0.2s,
         border-color 0.2s;
     width: fit-content;
 }
 
-.resume-btn:hover {
+.resume-open-btn:hover {
     background: rgba(255, 183, 125, 0.16);
     border-color: rgba(255, 183, 125, 0.4);
 }
 
-.resume-btn .material-symbols-outlined {
+.resume-open-btn .material-symbols-outlined {
     font-size: 1rem;
 }
 
