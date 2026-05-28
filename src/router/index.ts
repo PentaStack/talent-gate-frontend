@@ -31,6 +31,24 @@ const router = createRouter({
       meta: { requiresAuth: true, role: "candidate" as UserRole, title: "Find Jobs" },
     },
     {
+      path: "/jobs/:jobId/apply",
+      name: "candidate-apply",
+      component: () => import("@/views/candidate/ApplyView.vue"),
+      meta: { requiresAuth: true, role: "candidate" as UserRole, title: "Apply" },
+    },
+    {
+      path: "/applications/:applicationId",
+      name: "candidate-application-detail",
+      component: () => import("@/views/candidate/CandidateApplicationDetailView.vue"),
+      meta: { requiresAuth: true, role: "candidate" as UserRole, title: "Application Detail" },
+    },
+    {
+      path: "/applications",
+      name: "candidate-applications",
+      component: () => import("@/views/candidate/ApplicationsView.vue"),
+      meta: { requiresAuth: true, role: "candidate" as UserRole, title: "My Applications" },
+    },
+    {
       path: "/profile/edit",
       name: "profile-edit",
       component: () => import("@/views/profile/ProfileEditView.vue"),
@@ -107,6 +125,12 @@ const router = createRouter({
       },
     },
     {
+      path: "/employer/jobs",
+      name: "employer-jobs",
+      component: () => import("@/views/employer/EmployerJobsView.vue"),
+      meta: { requiresAuth: true, role: "employer" as UserRole, title: "My Jobs" },
+    },
+    {
       path: "/employer/analytics",
       name: "employer-analytics",
       component: () => import("@/views/employer/Analytics.vue"),
@@ -114,6 +138,26 @@ const router = createRouter({
         requiresAuth: true,
         role: "employer" as UserRole,
         title: "Analytics",
+      },
+    },
+    {
+      path: "/employer/jobs/:jobId/applications",
+      name: "employer-job-applications",
+      component: () => import("@/views/employer/JobApplicationsView.vue"),
+      meta: {
+        requiresAuth: true,
+        role: "employer" as UserRole,
+        title: "Job Applications",
+      },
+    },
+    {
+      path: "/employer/applications/:applicationId",
+      name: "employer-application-detail",
+      component: () => import("@/views/employer/ApplicationDetailView.vue"),
+      meta: {
+        requiresAuth: true,
+        role: "employer" as UserRole,
+        title: "Application Detail",
       },
     },
     {

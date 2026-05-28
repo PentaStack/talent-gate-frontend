@@ -59,6 +59,7 @@ export const mockEmployerAnalytics: EmployerAnalytics = {
 export const mockNotifications: AppNotification[] = [
   { id: 1, title: 'New application', body: 'Jane Candidate applied to Senior Vue Developer', read: false, type: 'application', created_at: new Date(Date.now() - 3600000).toISOString() },
   { id: 2, title: 'Application accepted', body: 'Your application for Laravel Backend Engineer was accepted', read: false, type: 'application', created_at: new Date(Date.now() - 7200000).toISOString() },
+  { id: 5, title: 'Application viewed', body: 'Your application for Senior Vue Developer has been viewed by the employer.', read: false, type: 'application', created_at: new Date(Date.now() - 1800000).toISOString() },
   { id: 3, title: 'Payment received', body: 'Payment of $250.00 completed successfully', read: true, type: 'payment', created_at: new Date(Date.now() - 86400000).toISOString() },
   { id: 4, title: 'Job approved', body: 'Your job listing "Product Manager" has been approved', read: true, type: 'job', created_at: new Date(Date.now() - 172800000).toISOString() },
 ]

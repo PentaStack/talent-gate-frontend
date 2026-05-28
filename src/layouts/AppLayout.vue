@@ -24,6 +24,7 @@ const navLinks = computed<NavItem[]>(() => {
   }
   if (auth.user.role === 'employer') {
     return [
+      { to: '/employer/jobs', label: 'My Jobs', icon: 'work' },
       { to: '/employer/analytics', label: 'Analytics', icon: 'analytics' },
       { to: '/profile/edit', label: 'Company Profile', icon: 'corporate_fare' },
       { to: '/payments/history', label: 'Payments', icon: 'payments' },
@@ -32,6 +33,7 @@ const navLinks = computed<NavItem[]>(() => {
   if (auth.user.role === 'candidate') {
     return [
       { to: '/jobs', label: 'Find Jobs', icon: 'work_history' },
+      { to: '/applications', label: 'My Applications', icon: 'description' },
       { to: '/profile/edit', label: 'My Profile', icon: 'person' },
     ]
   }
