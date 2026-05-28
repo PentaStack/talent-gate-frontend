@@ -81,7 +81,9 @@ export function mapNotification(raw: BackendNotification): AppNotification {
       ? 'New application'
       : notifType === 'application' && typeof data.status === 'string'
         ? `Application ${data.status}`
-        : 'Update'
+        : notifType === 'application' && raw.type.includes('Viewed')
+          ? 'Application viewed'
+          : 'Update'
 
   return {
     id: raw.id,
