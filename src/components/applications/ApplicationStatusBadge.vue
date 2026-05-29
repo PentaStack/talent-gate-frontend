@@ -10,11 +10,19 @@ const colorMap: Record<ApplicationStatus, string> = {
   rejected: '#f87171',
   withdrawn: '#6b7280',
 }
+
+const labelMap: Record<ApplicationStatus, string> = {
+  pending: 'In Review',
+  shortlisted: 'Shortlisted',
+  accepted: 'Accepted',
+  rejected: 'Not Selected',
+  withdrawn: 'Withdrawn',
+}
 </script>
 
 <template>
   <span class="status-badge" :style="{ color: colorMap[status], borderColor: colorMap[status] }">
-    {{ status }}
+    {{ labelMap[status] }}
   </span>
 </template>
 
@@ -27,7 +35,6 @@ const colorMap: Record<ApplicationStatus, string> = {
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.04em;
-  text-transform: capitalize;
   background: color-mix(in srgb, currentColor 12%, transparent);
 }
 </style>

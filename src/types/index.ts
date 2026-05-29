@@ -111,12 +111,17 @@ export interface EmployerApplicationListItem {
   submitted_at: string
   viewed_at: string | null
   cover_letter: string
+  notes: string | null
   candidate: {
     id: number
     name: string
+    email: string
+    bio: string | null
     experience_level: string | null
     skills: string[]
     avatar_url: string | null
+    resume_url: string | null
+    has_resume: boolean
   }
 }
 

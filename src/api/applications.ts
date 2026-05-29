@@ -44,3 +44,18 @@ export async function updateApplicationStatus(
   const { data } = await api.patch(`/v1/employer/applications/${applicationId}/status`, { status })
   return data.data
 }
+
+export async function fetchApplicationResume(applicationId: number): Promise<Blob> {
+  const response = await api.get(`/v1/employer/applications/${applicationId}/resume`, {
+    responseType: 'blob',
+  })
+  return response.data as Blob
+}
+
+export async function updateApplicationNotes(
+  applicationId: number,
+  notes: string | null,
+): Promise<EmployerApplicationListItem> {
+  const { data } = await api.patch(`/v1/employer/applications/${applicationId}/notes`, { notes })
+  return data.data
+}
