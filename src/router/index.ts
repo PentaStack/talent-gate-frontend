@@ -142,6 +142,16 @@ const router = createRouter({
       },
     },
     {
+      path: "/admin/comments",
+      name: "admin-comments",
+      component: () => import("@/views/admin/AdminCommentsView.vue"),
+      meta: {
+        requiresAuth: true,
+        role: "admin" as UserRole,
+        title: "Comment Moderation",
+      },
+    },
+    {
       path: "/employer/jobs",
       name: "employer-jobs",
       component: () => import("@/views/employer/EmployerJobsView.vue"),

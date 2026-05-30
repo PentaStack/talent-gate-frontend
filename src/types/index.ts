@@ -152,3 +152,32 @@ export interface PaginatedResponse<T> {
   data: T[]
   meta: { current_page: number; last_page: number; per_page: number; total: number }
 }
+
+export interface JobComment {
+  id: number
+  body: string
+  created_at: string
+  user: {
+    id: number
+    name: string
+    role: UserRole
+    avatar_url: string | null
+  }
+  is_owner: boolean
+}
+
+export interface AdminComment {
+  id: number
+  body: string
+  is_hidden: boolean
+  created_at: string
+  user: {
+    id: number
+    name: string
+  }
+  job: {
+    id: number
+    title: string
+  }
+}
+

@@ -6,7 +6,7 @@ import {
   mockCompletePayment,
   mockPayPalOrder,
 } from '@/api/mocks/dev5'
-import type { CheckoutSummary, Payment, PayPalOrderResponse } from '@/types'
+import type { CheckoutSummary, Payment, PayPalOrderResponse, StripeIntentResponse } from '@/types'
 
 export async function fetchPaymentByApplication(
   applicationId: number,
@@ -61,6 +61,11 @@ export async function createPayPalCheckout(
     order_id: String(data.payment_id),
     approval_url: data.approval_url,
   }
+}
+
+export async function createStripeIntent(applicationId: number): Promise<StripeIntentResponse> {
+  const { data } = await api.post<StripeIntentResponse>('/payments/stripe/intent', { application_id: applicationId })
+  return data
 }
 
 export async function fetchPaymentHistory(): Promise<Payment[]> {

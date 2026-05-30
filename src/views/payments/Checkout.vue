@@ -7,10 +7,12 @@ import {
   fetchCheckoutSummary,
   createPayPalCheckout,
   completeMockPayment,
+  createStripeIntent,
 } from '@/api/payments'
 import { useMocks } from '@/api/client'
 import { useToast } from '@/composables/useToast'
 import type { CheckoutSummary } from '@/types'
+import { loadStripe, type Stripe, type StripeElements } from '@stripe/stripe-js'
 
 const route = useRoute()
 const router = useRouter()
@@ -27,6 +29,10 @@ const applicationId = computed(() => {
   return id ? Number(id) : null
 })
 
+let stripe: Stripe | null = null
+let elements: StripeElements | null = null
+const stripeContainer = ref<HTMLElement | null>(null)
+
 onMounted(async () => {
   if (!applicationId.value) {
     loading.value = false
@@ -34,6 +40,9 @@ onMounted(async () => {
   }
   try {
     summary.value = await fetchCheckoutSummary(applicationId.value)
+    if (summary.value.provider === 'stripe' && !mocks) {
+      setTimeout(() => initStripe(), 100)
+    }
   } catch (e) {
     loadError.value = e instanceof Error ? e.message : 'Failed to load checkout'
     toast(loadError.value, 'error')
@@ -41,6 +50,44 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+async function initStripe() {
+  if (!applicationId.value || !stripeContainer.value) return
+  try {
+    const intent = await createStripeIntent(applicationId.value)
+    stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
+    if (stripe) {
+      elements = stripe.elements({ clientSecret: intent.client_secret, theme: 'night' })
+      const paymentElement = elements.create('payment')
+      paymentElement.mount(stripeContainer.value)
+    }
+  } catch (e) {
+    console.error('Stripe initialization failed', e)
+  }
+}
+
+async function payWithStripe() {
+  if (mocks) {
+    if (applicationId.value) await completeMockPayment(applicationId.value, 'stripe')
+    toast('Payment successful (mock)', 'success')
+    router.push({ name: 'payment-history' })
+    return
+  }
+
+  if (!stripe || !elements) return
+  paying.value = true
+  try {
+    const { error } = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: `${window.location.origin}/payments/history?success=true`,
+      },
+    })
+    if (error) toast(error.message || 'Payment failed', 'error')
+  } finally {
+    paying.value = false
+  }
+}
 
 async function payWithPayPal() {
   if (!summary.value?.job_id) {
@@ -111,10 +158,11 @@ async function payWithPayPal() {
               <span class="material-symbols-outlined">credit_card</span>
               <h3>Stripe payment</h3>
             </div>
-            <p class="pay-block__hint">
-              Pending payment created on accept. Completion via backend webhook
-              (<code>payment_intent.succeeded</code>).
-            </p>
+            <p class="pay-block__hint">Complete your payment securely with Stripe.</p>
+            <div ref="stripeContainer" class="stripe-element"></div>
+            <BaseButton variant="primary" :disabled="paying" @click="payWithStripe" class="mt-4">
+              {{ paying ? 'Processing…' : 'Pay with Stripe' }}
+            </BaseButton>
           </div>
 
           <div class="pay-block">
@@ -201,4 +249,6 @@ async function payWithPayPal() {
   color: var(--primary-dim);
 }
 .history-link:hover { color: var(--primary); }
+.stripe-element { margin-bottom: 1rem; min-height: 200px; }
+.mt-4 { margin-top: 1rem; }
 </style>

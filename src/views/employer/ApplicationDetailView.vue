@@ -163,9 +163,25 @@ function formatDate(iso: string) {
                             :current-status="application.status"
                             @update="handleStatusUpdate"
                         />
+                        <div v-if="application.status === 'accepted'" class="hero__payment-box">
+                            <template v-if="application.payment?.status === 'paid'">
+                                <span class="payment-success-msg">
+                                    <span class="material-symbols-outlined">check_circle</span> Paid (USD {{ application.payment.amount }})
+                                </span>
+                            </template>
+                            <template v-else>
+                                <router-link
+                                    :to="{ name: 'checkout', query: { applicationId: application.id } }"
+                                    class="btn-pay"
+                                >
+                                    <span class="material-symbols-outlined">payments</span>
+                                    Pay Acceptance Fee
+                                </router-link>
+                            </template>
+                        </div>
                         <p
                             v-if="
-                                !['pending', 'shortlisted'].includes(
+                                !['pending', 'shortlisted', 'accepted'].includes(
                                     application.status,
                                 )
                             "
@@ -672,5 +688,39 @@ function formatDate(iso: string) {
 .save-btn:disabled {
     opacity: 0.45;
     cursor: not-allowed;
+}
+
+.hero__payment-box {
+    margin-top: 0.75rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-pay {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.25rem;
+    border-radius: 9999px;
+    background: var(--primary-dim);
+    color: #000 !important;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.btn-pay:hover {
+    transform: translateY(-1px);
+    opacity: 0.9;
+}
+
+.payment-success-msg {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #86efac;
+    font-weight: 600;
+    font-size: 0.9rem;
 }
 </style>

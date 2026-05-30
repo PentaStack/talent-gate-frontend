@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppLayout from '@/layouts/AppLayout.vue'
+import JobComments from '@/components/jobs/JobComments.vue'
 import { fetchJob, type JobDetail } from '@/api/jobs'
 import { useApplicationsStore } from '@/stores/applications'
 
@@ -197,6 +198,8 @@ const requirementLines = (req: string | null) =>
           </div>
         </aside>
       </div>
+
+      <JobComments :job-id="jobId" />
     </div>
   </AppLayout>
 </template>
