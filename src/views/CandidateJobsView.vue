@@ -14,23 +14,32 @@
           <div class="stat-chip glass-panel">
             <span class="material-symbols-outlined">work</span>
             <div>
-              <p class="stat-chip__value">{{ jobs.length }}</p>
+              <p class="stat-chip__value">{{ meta.total }}</p>
               <p class="stat-chip__label">Open Roles</p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Search -->
+      <!-- Search + Sort -->
       <section class="jobs-search glass-panel" aria-label="Search jobs">
-        <div class="jobs-search__field">
-          <span class="material-symbols-outlined">search</span>
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Search by title or company…"
-            id="jobs-search-input"
-          />
+        <div class="jobs-search__inner">
+          <div class="jobs-search__field">
+            <span class="material-symbols-outlined">search</span>
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Search by title or description…"
+              id="jobs-search-input"
+            />
+          </div>
+          <div class="jobs-search__sort">
+            <label for="jobs-sort" class="sr-only">Sort by</label>
+            <select v-model="sort" id="jobs-sort">
+              <option value="newest">Newest</option>
+              <option value="deadline">Deadline</option>
+            </select>
+          </div>
         </div>
       </section>
 
@@ -40,11 +49,13 @@
       <!-- Job list -->
       <section v-else class="jobs-list" aria-label="Job listings">
         <div
-          v-for="job in filteredJobs"
+          v-for="job in jobs"
           :key="job.id"
           class="job-card glass-panel"
-          @click="router.push({ name: 'job-detail', params: { jobId: job.id } })"
-          style="cursor: pointer;"
+          @click="
+            router.push({ name: 'job-detail', params: { jobId: job.id } })
+          "
+          style="cursor: pointer"
         >
           <div class="job-card__logo">
             <img
@@ -85,52 +96,95 @@
         </div>
 
         <!-- Empty state -->
-        <div v-if="filteredJobs.length === 0" class="jobs-empty glass-panel">
+        <div v-if="jobs.length === 0" class="jobs-empty glass-panel">
           <span class="material-symbols-outlined">search_off</span>
           <h3>No matching roles found</h3>
           <p>Try adjusting your search criteria.</p>
         </div>
       </section>
+
+      <!-- Pagination -->
+      <div
+        v-if="meta.last_page > 1"
+        class="jobs-pagination"
+        aria-label="Pagination"
+      >
+        <button
+          class="page-btn"
+          :disabled="meta.current_page === 1"
+          @click="goToPage(meta.current_page - 1)"
+          aria-label="Previous page"
+        >
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+        <span class="page-indicator"
+          >{{ meta.current_page }} / {{ meta.last_page }}</span
+        >
+        <button
+          class="page-btn"
+          :disabled="meta.current_page === meta.last_page"
+          @click="goToPage(meta.current_page + 1)"
+          aria-label="Next page"
+        >
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+      </div>
     </div>
   </AppLayout>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import AppLayout from '@/layouts/AppLayout.vue'
-import { useApplicationsStore } from '@/stores/applications'
-import { fetchJobs } from '@/api/jobs'
-import type { JobListing } from '@/api/jobs'
+import { ref, watch, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import AppLayout from "@/layouts/AppLayout.vue";
+import { useApplicationsStore } from "@/stores/applications";
+import { fetchJobs } from "@/api/jobs";
+import type { JobListing } from "@/api/jobs";
 
-const router = useRouter()
-const applicationsStore = useApplicationsStore()
+const router = useRouter();
+const applicationsStore = useApplicationsStore();
 
-const searchQuery = ref('')
-const jobs = ref<JobListing[]>([])
-const isLoading = ref(true)
+const searchQuery = ref("");
+const sort = ref<"newest" | "deadline">("newest");
+const jobs = ref<JobListing[]>([]);
+const isLoading = ref(true);
+const meta = ref({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
 
-function openApplyPage(job: JobListing) {
-  router.push({ path: `/jobs/${job.id}/apply`, state: { jobTitle: job.title, jobCompany: job.employer.company_name } })
+async function loadJobs(page = 1) {
+  isLoading.value = true;
+  const res = await fetchJobs({
+    q: searchQuery.value.trim() || undefined,
+    sort: sort.value,
+    page,
+  });
+  jobs.value = res.data;
+  meta.value = res.meta;
+  isLoading.value = false;
 }
 
-onMounted(async () => {
-  await Promise.all([
-    fetchJobs().then((res) => { jobs.value = res.data }),
-    applicationsStore.fetchMyApplications(),
-  ])
-  isLoading.value = false
-})
+function goToPage(page: number) {
+  loadJobs(page);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
 
-const filteredJobs = computed(() => {
-  const q = searchQuery.value.toLowerCase()
-  if (!q) return jobs.value
-  return jobs.value.filter(
-    (job) =>
-      job.title.toLowerCase().includes(q) ||
-      job.employer.company_name.toLowerCase().includes(q),
-  )
-})
+function openApplyPage(job: JobListing) {
+  router.push({
+    path: `/jobs/${job.id}/apply`,
+    state: { jobTitle: job.title, jobCompany: job.employer.company_name },
+  });
+}
+
+let searchDebounce: ReturnType<typeof setTimeout> | null = null;
+watch(searchQuery, () => {
+  if (searchDebounce) clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(() => loadJobs(1), 350);
+});
+
+watch(sort, () => loadJobs(1));
+
+onMounted(async () => {
+  await Promise.all([loadJobs(1), applicationsStore.fetchMyApplications()]);
+});
 </script>
 
 <style scoped>
@@ -201,7 +255,9 @@ const filteredJobs = computed(() => {
   background: rgba(26, 26, 28, 0.6);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 183, 125, 0.15);
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
 .jobs-search {
@@ -209,7 +265,14 @@ const filteredJobs = computed(() => {
   padding: 0.4rem;
 }
 
+.jobs-search__inner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .jobs-search__field {
+  flex: 1;
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -236,6 +299,79 @@ const filteredJobs = computed(() => {
   color: rgba(221, 193, 174, 0.45);
 }
 
+.jobs-search__sort {
+  flex-shrink: 0;
+  padding: 0 1rem;
+  border-left: 1px solid rgba(255, 183, 125, 0.12);
+}
+
+.jobs-search__sort select {
+  background: transparent;
+  border: none;
+  color: var(--on-surface-variant);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  outline: none;
+  padding: 0.5rem 0;
+}
+
+.jobs-search__sort select option {
+  background: #1a1a1c;
+  color: var(--on-surface);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.jobs-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+}
+
+.page-btn {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 183, 125, 0.2);
+  background: rgba(255, 183, 125, 0.06);
+  color: var(--primary-dim);
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    opacity 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: rgba(255, 183, 125, 0.15);
+  border-color: rgba(255, 183, 125, 0.4);
+}
+
+.page-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.page-indicator {
+  font-size: 0.9rem;
+  color: var(--on-surface-variant);
+  min-width: 4rem;
+  text-align: center;
+}
+
 .jobs-loading {
   color: var(--on-surface-variant);
   text-align: center;
@@ -253,13 +389,18 @@ const filteredJobs = computed(() => {
   padding: 1.5rem;
   border-radius: 1.25rem;
   align-items: flex-start;
-  transition: border-color 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
+  transition:
+    border-color 0.25s ease,
+    transform 0.2s ease,
+    box-shadow 0.25s ease;
 }
 
 .job-card:hover {
   border-color: rgba(255, 183, 125, 0.3);
   transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 183, 125, 0.08);
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(255, 183, 125, 0.08);
 }
 
 .job-card__logo {
@@ -342,7 +483,10 @@ const filteredJobs = computed(() => {
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .apply-btn:hover {
