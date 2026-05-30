@@ -23,44 +23,58 @@ const router = createRouter({
       },
       meta: { requiresAuth: true, title: "Dashboard" },
     },
-    // Candidate home – job listings
+    // Candidate home – job listings with sidebar filters
     {
       path: "/jobs",
       name: "candidate-jobs",
       component: () => import("@/views/CandidateJobsView.vue"),
-      meta: { requiresAuth: true, role: "candidate" as UserRole, title: "Find Jobs" },
-    },
-    // Dev 3 – full search with filters (URL-synced)
-    {
-      path: "/search",
-      name: "job-search",
-      component: () => import("@/views/search/JobSearchView.vue"),
-      meta: { requiresAuth: true, role: "candidate" as UserRole, title: "Search Jobs" },
+      meta: {
+        requiresAuth: true,
+        role: "candidate" as UserRole,
+        title: "Find Jobs",
+      },
     },
     {
       path: "/jobs/:jobId",
       name: "job-detail",
       component: () => import("@/views/jobs/JobDetailView.vue"),
-      meta: { requiresAuth: true, role: "candidate" as UserRole, title: "Job Detail" },
+      meta: {
+        requiresAuth: true,
+        role: "candidate" as UserRole,
+        title: "Job Detail",
+      },
       props: true,
     },
     {
       path: "/jobs/:jobId/apply",
       name: "candidate-apply",
       component: () => import("@/views/candidate/ApplyView.vue"),
-      meta: { requiresAuth: true, role: "candidate" as UserRole, title: "Apply" },
+      meta: {
+        requiresAuth: true,
+        role: "candidate" as UserRole,
+        title: "Apply",
+      },
     },
     {
       path: "/applications/:applicationId",
       name: "candidate-application-detail",
-      component: () => import("@/views/candidate/CandidateApplicationDetailView.vue"),
-      meta: { requiresAuth: true, role: "candidate" as UserRole, title: "Application Detail" },
+      component: () =>
+        import("@/views/candidate/CandidateApplicationDetailView.vue"),
+      meta: {
+        requiresAuth: true,
+        role: "candidate" as UserRole,
+        title: "Application Detail",
+      },
     },
     {
       path: "/applications",
       name: "candidate-applications",
       component: () => import("@/views/candidate/ApplicationsView.vue"),
-      meta: { requiresAuth: true, role: "candidate" as UserRole, title: "My Applications" },
+      meta: {
+        requiresAuth: true,
+        role: "candidate" as UserRole,
+        title: "My Applications",
+      },
     },
     {
       path: "/profile/edit",
@@ -162,19 +176,31 @@ const router = createRouter({
       path: "/employer/jobs",
       name: "employer-jobs",
       component: () => import("@/views/employer/EmployerJobsView.vue"),
-      meta: { requiresAuth: true, role: "employer" as UserRole, title: "My Jobs" },
+      meta: {
+        requiresAuth: true,
+        role: "employer" as UserRole,
+        title: "My Jobs",
+      },
     },
     {
       path: "/employer/jobs/create",
       name: "employer-job-create",
       component: () => import("@/views/employer/CreateJobView.vue"),
-      meta: { requiresAuth: true, role: "employer" as UserRole, title: "Post New Job" },
+      meta: {
+        requiresAuth: true,
+        role: "employer" as UserRole,
+        title: "Post New Job",
+      },
     },
     {
       path: "/employer/jobs/:jobId/edit",
       name: "employer-job-edit",
       component: () => import("@/views/employer/EditJobView.vue"),
-      meta: { requiresAuth: true, role: "employer" as UserRole, title: "Edit Job" },
+      meta: {
+        requiresAuth: true,
+        role: "employer" as UserRole,
+        title: "Edit Job",
+      },
       props: true,
     },
     {

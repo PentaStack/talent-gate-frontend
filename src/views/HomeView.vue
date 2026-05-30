@@ -1,21 +1,35 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { RouterLink } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+import { ref, computed } from "vue";
+import { RouterLink, useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
 
-const auth = useAuthStore()
+const auth = useAuthStore();
+const router = useRouter();
+
+const searchQuery = ref("");
+const searchLocation = ref("");
+
+function submitSearch() {
+  const query: Record<string, string> = {};
+  if (searchQuery.value.trim()) query.q = searchQuery.value.trim();
+  if (searchLocation.value.trim()) query.location = searchLocation.value.trim();
+  router.push({ name: "candidate-jobs", query });
+}
 
 const primaryCta = computed(() => {
-  if (!auth.isAuthenticated) return { to: '/register', label: 'Find Your Next Role' }
-  if (auth.hasRole('employer')) return { to: '/profile/edit', label: 'Manage Company Profile' }
-  return { to: '/profile/edit', label: 'Complete Your Profile' }
-})
+  if (!auth.isAuthenticated)
+    return { to: "/register", label: "Find Your Next Role" };
+  if (auth.hasRole("employer"))
+    return { to: "/profile/edit", label: "Manage Company Profile" };
+  return { to: "/profile/edit", label: "Complete Your Profile" };
+});
 
 const secondaryCta = computed(() => {
-  if (!auth.isAuthenticated) return { to: '/login', label: 'Sign In' }
-  if (auth.hasRole('employer')) return { to: '/payments/checkout', label: 'Post a Job' }
-  return { to: { path: '/', hash: '#jobs' }, label: 'Browse Jobs' }
-})
+  if (!auth.isAuthenticated) return { to: "/login", label: "Sign In" };
+  if (auth.hasRole("employer"))
+    return { to: "/payments/checkout", label: "Post a Job" };
+  return { to: { path: "/", hash: "#jobs" }, label: "Browse Jobs" };
+});
 </script>
 
 <template>
@@ -33,9 +47,19 @@ const secondaryCta = computed(() => {
         </div>
       </div>
       <div class="nav-actions">
-        <RouterLink v-if="!auth.isAuthenticated" to="/login" class="nav-ghost">Sign In</RouterLink>
-        <RouterLink v-else to="/profile/edit" class="nav-ghost">Profile</RouterLink>
-        <RouterLink v-if="!auth.isAuthenticated || auth.isEmployer" :to="auth.isEmployer ? '/payments/checkout' : '/register'" class="nav-primary">Post a Job</RouterLink>      </div>
+        <RouterLink v-if="!auth.isAuthenticated" to="/login" class="nav-ghost"
+          >Sign In</RouterLink
+        >
+        <RouterLink v-else to="/profile/edit" class="nav-ghost"
+          >Profile</RouterLink
+        >
+        <RouterLink
+          v-if="!auth.isAuthenticated || auth.isEmployer"
+          :to="auth.isEmployer ? '/payments/checkout' : '/register'"
+          class="nav-primary"
+          >Post a Job</RouterLink
+        >
+      </div>
     </nav>
 
     <main class="page-wrap">
@@ -47,12 +71,17 @@ const secondaryCta = computed(() => {
           </div>
           <h1>The Future of Technical Recruitment</h1>
           <p>
-            Precision-matched opportunities for the world&apos;s elite engineers.
-            Experience a deep-focus hiring platform designed for technical minds.
+            Precision-matched opportunities for the world&apos;s elite
+            engineers. Experience a deep-focus hiring platform designed for
+            technical minds.
           </p>
           <div class="hero-actions">
-            <RouterLink :to="primaryCta.to" class="cta-primary">{{ primaryCta.label }}</RouterLink>
-            <RouterLink :to="secondaryCta.to" class="cta-secondary">{{ secondaryCta.label }}</RouterLink>
+            <RouterLink :to="primaryCta.to" class="cta-primary">{{
+              primaryCta.label
+            }}</RouterLink>
+            <RouterLink :to="secondaryCta.to" class="cta-secondary">{{
+              secondaryCta.label
+            }}</RouterLink>
           </div>
         </div>
 
@@ -60,7 +89,9 @@ const secondaryCta = computed(() => {
           <div class="hero-map"></div>
           <div class="floating-card floating-card--top glass-panel glow-amber">
             <div class="floating-card__row">
-              <div class="floating-icon"><span class="material-symbols-outlined">terminal</span></div>
+              <div class="floating-icon">
+                <span class="material-symbols-outlined">terminal</span>
+              </div>
               <div>
                 <p class="card-title">Senior Rust Dev</p>
                 <p class="card-subtitle">Neural Systems</p>
@@ -71,7 +102,9 @@ const secondaryCta = computed(() => {
           </div>
           <div class="floating-card floating-card--bottom glass-panel">
             <div class="floating-card__row">
-              <span class="material-symbols-outlined floating-globe">public</span>
+              <span class="material-symbols-outlined floating-globe"
+                >public</span
+              >
               <div>
                 <p class="card-title">Remote Setup</p>
                 <p class="card-subtitle">Verified Location</p>
@@ -81,16 +114,30 @@ const secondaryCta = computed(() => {
         </div>
       </section>
 
-      <section class="search-section glass-panel" aria-label="Search jobs">
+      <section
+        class="search-section glass-panel"
+        aria-label="Search jobs"
+        @keydown.enter="submitSearch"
+      >
         <div class="search-field">
           <span class="material-symbols-outlined">search</span>
-          <input type="text" placeholder="Keywords (e.g. Rust, Go, React)" />
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Keywords (e.g. Vue, Laravel, React)"
+          />
         </div>
         <div class="search-field search-field--split">
           <span class="material-symbols-outlined">location_on</span>
-          <input type="text" placeholder="Location or Remote" />
+          <input
+            v-model="searchLocation"
+            type="text"
+            placeholder="Location or Remote"
+          />
         </div>
-        <button type="button" class="search-button">Search</button>
+        <button type="button" class="search-button" @click="submitSearch">
+          Search
+        </button>
       </section>
 
       <section class="section-block">
@@ -109,8 +156,8 @@ const secondaryCta = computed(() => {
             </div>
             <h3>AI-Driven Matching</h3>
             <p>
-              Our models analyze technical stacks and experience signals to surface highly
-              relevant role recommendations.
+              Our models analyze technical stacks and experience signals to
+              surface highly relevant role recommendations.
             </p>
           </article>
 
@@ -120,8 +167,8 @@ const secondaryCta = computed(() => {
             </div>
             <h3>Verified Profiles</h3>
             <p>
-              Pre-verified technical capabilities instantly signal seniority to top-tier
-              engineering teams.
+              Pre-verified technical capabilities instantly signal seniority to
+              top-tier engineering teams.
             </p>
           </article>
 
@@ -131,8 +178,8 @@ const secondaryCta = computed(() => {
             </div>
             <h3>Deep-Focus Workspace</h3>
             <p>
-              A cyber-noir interface designed to reduce cognitive load and keep hiring work
-              organized.
+              A cyber-noir interface designed to reduce cognitive load and keep
+              hiring work organized.
             </p>
           </article>
         </div>
@@ -144,7 +191,10 @@ const secondaryCta = computed(() => {
             <h2>Featured Opportunities</h2>
             <p>Exclusive roles actively recruiting this week.</p>
           </div>
-          <a href="#" class="section-link">View All Roles <span class="material-symbols-outlined">arrow_forward</span></a>
+          <a href="#" class="section-link"
+            >View All Roles
+            <span class="material-symbols-outlined">arrow_forward</span></a
+          >
         </div>
 
         <div class="job-list">
@@ -214,12 +264,14 @@ const secondaryCta = computed(() => {
         <div>
           <h2>Ready to hire smarter?</h2>
           <p>
-            Create a profile, post a job, and keep the full workflow inside one focused
-            platform.
+            Create a profile, post a job, and keep the full workflow inside one
+            focused platform.
           </p>
         </div>
         <div class="hero-actions">
-          <RouterLink to="/register" class="cta-primary">Get Started</RouterLink>
+          <RouterLink to="/register" class="cta-primary"
+            >Get Started</RouterLink
+          >
           <RouterLink to="/login" class="cta-secondary">Sign In</RouterLink>
         </div>
       </section>
@@ -246,8 +298,16 @@ const secondaryCta = computed(() => {
   min-height: 100vh;
   overflow-x: hidden;
   background:
-    radial-gradient(circle at top left, rgba(255, 183, 125, 0.12), transparent 30%),
-    radial-gradient(circle at bottom right, rgba(201, 190, 255, 0.09), transparent 28%),
+    radial-gradient(
+      circle at top left,
+      rgba(255, 183, 125, 0.12),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(201, 190, 255, 0.09),
+      transparent 28%
+    ),
     var(--bg-ink);
 }
 
@@ -275,7 +335,10 @@ const secondaryCta = computed(() => {
   background: rgba(26, 26, 28, 0.6);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 183, 125, 0.15);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
 }
 
 .glass-panel:hover {
@@ -365,7 +428,10 @@ const secondaryCta = computed(() => {
   border-radius: 9999px;
   font-weight: 600;
   letter-spacing: 0.04em;
-  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .nav-ghost,
@@ -412,7 +478,11 @@ const secondaryCta = computed(() => {
   line-height: 1.05;
   letter-spacing: -0.04em;
   color: var(--on-surface);
-  background-image: linear-gradient(to right, var(--on-surface), var(--on-surface-variant));
+  background-image: linear-gradient(
+    to right,
+    var(--on-surface),
+    var(--on-surface-variant)
+  );
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -481,7 +551,8 @@ const secondaryCta = computed(() => {
   border-radius: 2rem;
   background:
     linear-gradient(rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
-    url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=2070') center/cover;
+    url("https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=2070")
+      center/cover;
   opacity: 0.12;
 }
 
@@ -813,15 +884,27 @@ const secondaryCta = computed(() => {
 }
 
 @keyframes float {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0); }
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0);
+  }
 }
 
 @keyframes float-delayed {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-  100% { transform: translateY(0); }
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+  100% {
+    transform: translateY(0);
+  }
 }
 
 @media (min-width: 768px) {
