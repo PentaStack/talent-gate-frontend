@@ -27,6 +27,29 @@ export interface AdminUser {
   created_at: string
 }
 
+export interface AdminPendingJob {
+  id: number
+  title: string
+  description: string | null
+  requirements: string | null
+  salary_range: string | null
+  work_type: string | null
+  location: string | null
+  status: string
+  rejection_reason: string | null
+  application_deadline: string | null
+  created_at: string
+  category: { id: number; name: string } | null
+  technologies: { id: number; name: string }[]
+  employer: {
+    id: number
+    name: string
+    email: string
+    company_name: string
+    logo_url: string | null
+  }
+}
+
 export interface JobAnalytics {
   job_id: number
   title: string

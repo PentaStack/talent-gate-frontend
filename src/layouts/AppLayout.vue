@@ -19,6 +19,7 @@ const navLinks = computed<NavItem[]>(() => {
   if (auth.user.role === 'admin') {
     return [
       { to: '/admin/dashboard', label: 'Dashboard', icon: 'dashboard' },
+      { to: '/admin/approvals', label: 'Approvals', icon: 'fact_check' },
       { to: '/admin/users', label: 'Users', icon: 'group' },
     ]
   }

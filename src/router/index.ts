@@ -132,6 +132,16 @@ const router = createRouter({
       },
     },
     {
+      path: "/admin/approvals",
+      name: "admin-approvals",
+      component: () => import("@/views/admin/AdminApprovalsView.vue"),
+      meta: {
+        requiresAuth: true,
+        role: "admin" as UserRole,
+        title: "Job Approvals",
+      },
+    },
+    {
       path: "/employer/jobs",
       name: "employer-jobs",
       component: () => import("@/views/employer/EmployerJobsView.vue"),

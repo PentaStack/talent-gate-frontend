@@ -15,12 +15,12 @@ onMounted(async () => {
   isLoading.value = false
 })
 
-const statusStyle: Record<string, { color: string; bg: string }> = {
-  active:   { color: '#86efac', bg: 'rgba(134,239,172,0.1)' },
-  closed:   { color: '#6b7280', bg: 'rgba(107,114,128,0.1)' },
-  pending:  { color: '#fbbf24', bg: 'rgba(251,191,36,0.1)' },
-  draft:    { color: '#6b7280', bg: 'rgba(107,114,128,0.08)' },
-  rejected: { color: '#f87171', bg: 'rgba(248,113,113,0.1)' },
+const statusStyle: Record<string, { color: string; bg: string; label: string }> = {
+  active:   { color: '#86efac', bg: 'rgba(134,239,172,0.1)', label: 'Active' },
+  closed:   { color: '#6b7280', bg: 'rgba(107,114,128,0.1)', label: 'Closed' },
+  pending:  { color: '#fbbf24', bg: 'rgba(251,191,36,0.1)', label: 'Awaiting Review' },
+  draft:    { color: '#6b7280', bg: 'rgba(107,114,128,0.08)', label: 'Draft' },
+  rejected: { color: '#f87171', bg: 'rgba(248,113,113,0.1)', label: 'Rejected' },
 }
 
 const workTypeLabel: Record<string, string> = {
@@ -80,7 +80,7 @@ async function confirmDelete(id: number) {
               <span
                 class="status-badge"
                 :style="{ color: statusStyle[job.status]?.color ?? '#fff', background: statusStyle[job.status]?.bg ?? 'transparent' }"
-              >{{ job.status }}</span>
+              >{{ statusStyle[job.status]?.label ?? job.status }}</span>
 
               <span class="app-count">
                 <span class="material-symbols-outlined">description</span>
@@ -105,6 +105,10 @@ async function confirmDelete(id: number) {
               <button v-else type="button" class="action-btn action-btn--danger" :id="`delete-job-${job.id}`" @click="confirmDeleteId = job.id">
                 <span class="material-symbols-outlined">delete</span>
               </button>
+            </div>
+            <div v-if="job.status === 'rejected' && job.rejection_reason" class="job-row__rejection">
+              <span class="material-symbols-outlined">info</span>
+              <span>{{ job.rejection_reason }}</span>
             </div>
           </div>
         </div>
@@ -209,4 +213,20 @@ async function confirmDelete(id: number) {
 .jobs-empty { display: grid; place-items: center; gap: 0.75rem; padding: 4rem 2rem; border-radius: 1.25rem; text-align: center; }
 .jobs-empty .material-symbols-outlined { font-size: 2.5rem; color: var(--on-surface-variant); }
 .jobs-empty p { margin: 0; color: var(--on-surface-variant); }
+
+.job-row__rejection {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 0.5rem;
+  background: rgba(248, 113, 113, 0.07);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  color: #f87171;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  width: 100%;
+}
+.job-row__rejection .material-symbols-outlined { font-size: 0.95rem; flex-shrink: 0; margin-top: 0.05rem; }
 </style>

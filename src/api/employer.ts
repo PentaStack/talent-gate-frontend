@@ -5,6 +5,7 @@ export interface EmployerJob {
   id: number
   title: string
   status: string
+  rejection_reason: string | null
   work_type: string | null
   location: string | null
   salary_range: string | null
