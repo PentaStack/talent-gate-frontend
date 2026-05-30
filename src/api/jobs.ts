@@ -11,6 +11,12 @@ export interface Category {
   slug: string;
 }
 
+export interface Location {
+  id: number;
+  name: string;
+  slug: string;
+}
+
 export interface JobListing {
   id: number;
   title: string;
@@ -20,6 +26,7 @@ export interface JobListing {
   location: string | null;
   experience_level: "entry" | "mid" | "senior" | "lead" | null;
   application_deadline: string | null;
+  created_at: string | null;
   category: Category | null;
   technologies: Technology[];
   employer: {
@@ -31,7 +38,6 @@ export interface JobListing {
 export interface JobDetail extends JobListing {
   requirements: string | null;
   views_count: number;
-  created_at: string | null;
   employer: {
     company_name: string;
     logo_url: string | null;
@@ -46,11 +52,15 @@ export interface JobFilters {
   page?: number;
   per_page?: number;
   experience_level?: "entry" | "mid" | "senior" | "lead";
+  location?: string;
+  work_type?: "remote" | "onsite" | "hybrid";
+  /** Category slug or numeric id as string */
+  category?: string;
+  /** ISO date string YYYY-MM-DD — filter jobs posted on/after this date */
+  date_from?: string;
 }
 
-export async function fetchJobs(
-  filters: JobFilters = {},
-): Promise<{
+export interface PaginatedJobsResponse {
   data: JobListing[];
   meta: {
     current_page: number;
@@ -58,7 +68,9 @@ export async function fetchJobs(
     per_page: number;
     total: number;
   };
-}> {
+}
+
+function buildParams(filters: JobFilters): Record<string, string | number> {
   const params: Record<string, string | number> = {};
   if (filters.q) params.q = filters.q;
   if (filters.sort) params.sort = filters.sort;
@@ -66,7 +78,28 @@ export async function fetchJobs(
   if (filters.per_page) params.per_page = filters.per_page;
   if (filters.experience_level)
     params.experience_level = filters.experience_level;
-  const { data } = await api.get("/v1/jobs", { params });
+  if (filters.location) params.location = filters.location;
+  if (filters.work_type) params.work_type = filters.work_type;
+  if (filters.category) params.category = filters.category;
+  if (filters.date_from) params.date_from = filters.date_from;
+  return params;
+}
+
+/** Fetch active jobs for the candidate home page (/v1/jobs) */
+export async function fetchJobs(
+  filters: JobFilters = {},
+): Promise<PaginatedJobsResponse> {
+  const { data } = await api.get("/v1/jobs", { params: buildParams(filters) });
+  return data;
+}
+
+/** Full search with all filters (/v1/search/jobs) */
+export async function fetchSearchJobs(
+  filters: JobFilters = {},
+): Promise<PaginatedJobsResponse> {
+  const { data } = await api.get("/v1/search/jobs", {
+    params: buildParams(filters),
+  });
   return data;
 }
 
@@ -82,5 +115,11 @@ export async function fetchCategories(): Promise<Category[]> {
 
 export async function fetchTechnologies(): Promise<Technology[]> {
   const { data } = await api.get("/v1/technologies");
+  return data.data;
+}
+
+/** Location reference list for autocomplete (public, no auth required) */
+export async function fetchLocations(): Promise<Location[]> {
+  const { data } = await api.get("/v1/search/locations");
   return data.data;
 }

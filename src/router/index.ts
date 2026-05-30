@@ -30,6 +30,13 @@ const router = createRouter({
       component: () => import("@/views/CandidateJobsView.vue"),
       meta: { requiresAuth: true, role: "candidate" as UserRole, title: "Find Jobs" },
     },
+    // Dev 3 – full search with filters (URL-synced)
+    {
+      path: "/search",
+      name: "job-search",
+      component: () => import("@/views/search/JobSearchView.vue"),
+      meta: { requiresAuth: true, role: "candidate" as UserRole, title: "Search Jobs" },
+    },
     {
       path: "/jobs/:jobId",
       name: "job-detail",
