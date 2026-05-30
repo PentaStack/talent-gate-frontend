@@ -43,6 +43,8 @@
           v-for="job in filteredJobs"
           :key="job.id"
           class="job-card glass-panel"
+          @click="router.push({ name: 'job-detail', params: { jobId: job.id } })"
+          style="cursor: pointer;"
         >
           <div class="job-card__logo">
             <img
