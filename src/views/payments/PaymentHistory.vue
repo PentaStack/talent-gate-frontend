@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import AppLayout from '@/layouts/AppLayout.vue'
 import BaseButton from '@/components/shared/BaseButton.vue'
@@ -13,6 +13,12 @@ const router = useRouter()
 onMounted(async () => {
   payments.value = await fetchPaymentHistory()
   loading.value = false
+})
+
+const totalPaid = computed(() => {
+  return payments.value
+    .filter(p => p.status === 'paid')
+    .reduce((sum, p) => sum + p.amount, 0)
 })
 
 function statusClass(status: PaymentStatus) {
@@ -38,9 +44,20 @@ function statusClass(status: PaymentStatus) {
       <span class="material-symbols-outlined empty-panel__icon">payments</span>
       <p>No payments yet.</p>
     </div>
-    <div v-else class="glass-panel table-panel">
-      <div class="table-wrap">
-        <table class="data-table">
+    <div v-else class="payment-content">
+      <div class="summary-card glass-panel">
+        <div class="summary-card__icon">
+          <span class="material-symbols-outlined">account_balance</span>
+        </div>
+        <div>
+          <p class="summary-card__label">Total Paid</p>
+          <p class="summary-card__value">USD {{ totalPaid.toFixed(2) }}</p>
+        </div>
+      </div>
+
+      <div class="glass-panel table-panel">
+        <div class="table-wrap">
+          <table class="data-table">
           <thead>
             <tr>
               <th>Date</th>
@@ -77,6 +94,7 @@ function statusClass(status: PaymentStatus) {
         </table>
       </div>
     </div>
+  </div>
   </AppLayout>
 </template>
 
@@ -111,4 +129,27 @@ function statusClass(status: PaymentStatus) {
   display: block;
   margin-bottom: 1rem;
 }
+.payment-content {
+  display: grid;
+  gap: 1.5rem;
+}
+.summary-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  max-width: 300px;
+}
+.summary-card__icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: rgba(134, 239, 172, 0.1);
+  color: #86efac;
+  display: grid;
+  place-items: center;
+}
+.summary-card__icon .material-symbols-outlined { font-size: 1.5rem; }
+.summary-card__label { margin: 0; font-size: 0.85rem; color: var(--on-surface-variant); }
+.summary-card__value { margin: 0; font-family: var(--font-display), serif; font-size: 1.5rem; font-weight: 700; color: var(--on-surface); }
 </style>

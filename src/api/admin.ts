@@ -12,7 +12,7 @@ import {
   mockEmployerAnalytics,
   mockPromoteUser,
 } from '@/api/mocks/dev5'
-import type { AdminStats, AdminUser, EmployerAnalytics, UserRole } from '@/types'
+import type { AdminStats, AdminUser, AdminPendingJob, EmployerAnalytics, UserRole, AdminComment, PaginatedResponse } from '@/types'
 
 export async function fetchAdminStats(): Promise<AdminStats> {
   if (useMocks()) {
@@ -59,6 +59,37 @@ export async function fetchEmployerAnalytics(): Promise<EmployerAnalytics> {
   return mapEmployerAnalytics(data)
 }
 
+export async function fetchPendingJobs(): Promise<AdminPendingJob[]> {
+  const { data } = await api.get<{ data: AdminPendingJob[] }>('/admin/jobs')
+  return data.data ?? data
+}
+
+export async function approveJob(id: number): Promise<AdminPendingJob> {
+  const { data } = await api.patch<{ data: AdminPendingJob }>(`/admin/jobs/${id}/approve`)
+  return data.data
+}
+
+export async function rejectJob(id: number, reason?: string): Promise<AdminPendingJob> {
+  const { data } = await api.patch<{ data: AdminPendingJob }>(`/admin/jobs/${id}/reject`, { reason })
+  return data.data
+}
+
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+export async function fetchAdminComments(page = 1, filter?: string): Promise<PaginatedResponse<AdminComment>> {
+  const params: Record<string, any> = { page }
+  if (filter) params.filter = filter
+  const { data } = await api.get<PaginatedResponse<AdminComment>>('/admin/comments', { params })
+  return data
+}
+
+export async function hideComment(id: number): Promise<AdminComment> {
+  const { data } = await api.patch<{ data: AdminComment }>(`/admin/comments/${id}/hide`)
+  return data.data
+}
+
+export async function deleteAdminComment(id: number): Promise<void> {
+  await api.delete(`/admin/comments/${id}`)
 }
